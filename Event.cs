@@ -36,11 +36,8 @@ public class EventBase : IEvent
             {
                 if (!_eventListenersPriority.TryGetValue(priority, out var list))
                     continue;
-                for (var i = list.Count - 1; i >= 0; i--)
-                {
-                    var listener = list[i];
+                foreach (var listener in list)
                     ((EventHandler<T>)listener.Delegate).Invoke(value!);
-                }
             }
     }
 
@@ -51,11 +48,8 @@ public class EventBase : IEvent
             {
                 if (!_eventListenersPriority.TryGetValue(priority, out var list))
                     continue;
-                for (var i = list.Count - 1; i >= 0; i--)
-                {
-                    var listener = list[i];
+                foreach (var listener in list)
                     ((EventHandler)listener.Delegate).Invoke();
-                }
             }
     }
 
