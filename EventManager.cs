@@ -23,7 +23,7 @@ public static class EventManager
         }
     }
 
-    internal static void OnRaise<T>(ref T args) where T : IEventArgs
+    internal static void OnRaise<T>(T args) where T : IEventArgs
     {
         var type = typeof(T);
         lock (LockObj)
@@ -52,7 +52,7 @@ public static class EventManager
                 {
                     var arguments = method.GetParameters();
                     if (method.GetCustomAttributes().FirstOrDefault(att => att is EventHandlerAttribute) is
-                            not EventHandlerAttribute attribute || arguments.Length != 1 ||
+                            not EventHandlerAttribute attribute || arguments.Length < 1 || arguments.Length > 2 ||
                         !typeof(IEventArgs).IsAssignableFrom(arguments[0].ParameterType)) continue;
                     var eventType = arguments[0].ParameterType;
 
@@ -62,8 +62,10 @@ public static class EventManager
                         Actions.Add(eventType, e);
                     }
 
-                    var del = method.CreateDelegate(typeof(EventHandler<>).MakeGenericType(eventType));
-                    e.Add(new Listener(e, del, attribute.Priority));
+                    var hasListener = arguments.Length == 2;
+                    
+                    var del = method.CreateDelegate((hasListener ? typeof(EventHandlerListener<>) : typeof(EventHandler<>)).MakeGenericType(eventType));
+                    e.Add(new Listener(e, del, attribute.Priority, hasListener));
                 }
 
                 if (isStatic) break;

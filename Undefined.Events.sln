@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Undefined.Events", "Undefined.Events.csproj", "{B58BD949-4C6E-445D-BC00-D9E43D09200D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Undefined.Events.Test", "..\Undefined.Events.Test\Undefined.Events.Test.csproj", "{FD3EF647-F647-4DFB-B4D5-7B8D5442E30B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{B58BD949-4C6E-445D-BC00-D9E43D09200D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B58BD949-4C6E-445D-BC00-D9E43D09200D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B58BD949-4C6E-445D-BC00-D9E43D09200D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FD3EF647-F647-4DFB-B4D5-7B8D5442E30B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD3EF647-F647-4DFB-B4D5-7B8D5442E30B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD3EF647-F647-4DFB-B4D5-7B8D5442E30B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD3EF647-F647-4DFB-B4D5-7B8D5442E30B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
