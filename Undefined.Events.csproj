@@ -4,6 +4,16 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Version>1.0.2</Version>
+        <Title>Event System</Title>
+        <Description>Easy-to-use event system implementation.</Description>
+        <Copyright>Copyright © LunarLife 2023</Copyright>
+        <PackageProjectUrl>https://github.com/lunarlife/Undefined.Events</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/dotnet/runtime/blob/main/LICENSE.TXT</PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/lunarlife/Undefined.Events</RepositoryUrl>
+        <RepositoryType>https://github.com/lunarlife/Undefined.Events</RepositoryType>
+        <PackageTags>events event</PackageTags>
     </PropertyGroup>
 
 </Project>

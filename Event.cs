@@ -12,17 +12,28 @@ public interface IEvent
 {
     public IReadOnlyList<Listener> Listeners { get; }
     public void DetachListener(Listener listener);
+    public void DetachAllListeners();
+    
 }
 
 public class EventBase : IEvent
 {
     private readonly Dictionary<Priority, List<Listener>> _eventListenersPriority = new();
-    private readonly List<Listener> _eventListeners = new();
+    private readonly List<Listener> _eventListeners = [];
     public IReadOnlyList<Listener> Listeners => _eventListeners.AsReadOnly();
     private readonly object _lockObj = new();
 
     internal EventBase()
     {
+    }
+
+    public void DetachAllListeners()
+    {
+        lock (_lockObj)
+        {
+            for (var i = 0; i < _eventListeners.Count; i++) _eventListeners.RemoveAt(i);
+            _eventListenersPriority.Clear();
+        }
     }
 
     public void DetachListener(Listener listener)
