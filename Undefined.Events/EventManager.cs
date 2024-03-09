@@ -27,9 +27,9 @@ public static class EventManager
     {
         var type = typeof(T);
         lock (LockObj)
-            foreach (var (key, value) in Actions)
-                if (key.IsAssignableFrom(type))
-                    value.Raise(args);
+            foreach (var pair in Actions)
+                if (pair.Key.IsAssignableFrom(type))
+                    pair.Value.Raise(args);
     }
 
     public static void RegisterEvents(IEventsHandler handler) => RegisterEvents(handler.GetType(), handler);
