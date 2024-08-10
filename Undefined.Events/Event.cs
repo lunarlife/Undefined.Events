@@ -97,6 +97,7 @@ public sealed class Event : EventBase
     }
 
     public void Raise() => base.Raise<IEventArgs>(null);
+    public async Task RaiseAsync() => await Task.Run(() => base.Raise<IEventArgs>(null));
 
     public Listener AddListener(EventHandler handler, Priority priority = Priority.Normal) =>
         Add(new Listener(this, handler, priority, false));
@@ -114,10 +115,16 @@ public sealed class Event<T> : EventBase where T : IEventArgs
         Access = new EventAccess<T>(this);
     }
 
-    public void Raise(T args)
+    public RaiseResult<T> Raise(T args)
     {
         base.Raise(args);
         EventManager.OnRaise(args);
+        return new RaiseResult<T>(args);
+    }
+
+    public async Task<RaiseResult<T>> RaiseAsync(T args)
+    {
+        return await Task.Run(() => Raise(args));
     }
 
     public Listener AddListener(EventHandler<T> handler, Priority priority = Priority.Normal) =>
