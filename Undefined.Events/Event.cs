@@ -13,15 +13,14 @@ public interface IEvent
     public IReadOnlyList<Listener> Listeners { get; }
     public void DetachListener(Listener listener);
     public void DetachAllListeners();
-    
 }
 
 public class EventBase : IEvent
 {
-    private readonly Dictionary<Priority, List<Listener>> _eventListenersPriority = new();
     private readonly List<Listener> _eventListeners = [];
-    public IReadOnlyList<Listener> Listeners => _eventListeners.AsReadOnly();
+    private readonly Dictionary<Priority, List<Listener>> _eventListenersPriority = new();
     private readonly object _lockObj = new();
+    public IReadOnlyList<Listener> Listeners => _eventListeners.AsReadOnly();
 
     internal EventBase()
     {

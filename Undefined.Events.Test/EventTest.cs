@@ -37,6 +37,7 @@ public class EventTest
         listener.Detach();
         Assert.AreEqual(0, _event.Listeners.Count);
     }
+
     [TestMethod]
     public void Listener_Can_Be_Detached_Raised()
     {
@@ -44,7 +45,9 @@ public class EventTest
         _event.Raise();
         Assert.AreEqual(0, _event.Listeners.Count);
     }
+
     private void OnEventRaised() => _eventRaised = true;
+
     private void OnEventRaisedDetach(Listener listener)
     {
         _eventRaised = true;

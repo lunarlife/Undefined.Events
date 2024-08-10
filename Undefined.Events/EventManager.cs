@@ -45,7 +45,6 @@ public static class EventManager
             flags |= BindingFlags.Instance;
         var baseType = listenerType;
         lock (LockObj)
-        {
             while (baseType != null)
             {
                 foreach (var method in baseType.GetMethods(flags))
@@ -63,14 +62,15 @@ public static class EventManager
                     }
 
                     var hasListener = arguments.Length == 2;
-                    
-                    var del = method.CreateDelegate((hasListener ? typeof(EventHandlerListener<>) : typeof(EventHandler<>)).MakeGenericType(eventType));
+
+                    var del = method.CreateDelegate(
+                        (hasListener ? typeof(EventHandlerListener<>) : typeof(EventHandler<>)).MakeGenericType(
+                            eventType));
                     e.Add(new Listener(e, del, attribute.Priority, hasListener));
                 }
 
                 if (isStatic) break;
                 baseType = baseType.BaseType;
             }
-        }
     }
 }

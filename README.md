@@ -1,4 +1,5 @@
 EXAMPLE:
+
 ```csharp
 private readonly Event _onSomeHappens = new();
 
