@@ -20,6 +20,7 @@ public class EventBase : IEvent
     private readonly List<Listener> _eventListeners = [];
     private readonly Dictionary<Priority, List<Listener>> _eventListenersPriority = new();
     private readonly object _lockObj = new();
+
     public IReadOnlyList<Listener> Listeners => _eventListeners.AsReadOnly();
 
     internal EventBase()
@@ -109,16 +110,23 @@ public sealed class Event : EventBase
 public sealed class Event<T> : EventBase where T : IEventArgs
 {
     public IEventAccess<T> Access { get; }
+    private bool _isStatic;
 
     public Event()
     {
         Access = new EventAccess<T>(this);
     }
 
+    internal Event(bool isStatic)
+    {
+        _isStatic = isStatic;
+    }
+
     public RaiseResult<T> Raise(T args)
     {
         base.Raise(args);
-        EventManager.OnRaise(args);
+        if (!_isStatic)
+            EventsManager.OnRaiseInternal(args);
         return new RaiseResult<T>(args);
     }
 
