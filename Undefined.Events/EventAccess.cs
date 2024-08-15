@@ -1,12 +1,12 @@
 namespace Undefined.Events;
 
-public interface IEventAccess
+public interface IEventAccess : IDisposable
 {
     public Listener AddListener(EventHandler handler, Priority priority = Priority.Normal);
     public Listener AddListener(EventHandlerListener handler, Priority priority = Priority.Normal);
 }
 
-public interface IEventAccess<out T> where T : IEventArgs
+public interface IEventAccess<out T> : IDisposable where T : IEventArgs
 {
     public Listener AddListener(EventHandler<T> handler, Priority priority = Priority.Normal);
     public Listener AddListener(EventHandlerListener<T> handler, Priority priority = Priority.Normal);
@@ -23,6 +23,12 @@ internal sealed class EventAccess : IEventAccess
 
     public Listener AddListener(EventHandlerListener handler, Priority priority = Priority.Normal) =>
         _event.AddListener(handler, priority);
+
+    public void Dispose()
+    {
+        if (!_event.IsDisposed)
+            _event.Dispose();
+    }
 }
 
 internal sealed class EventAccess<T> : IEventAccess<T> where T : IEventArgs
@@ -36,4 +42,10 @@ internal sealed class EventAccess<T> : IEventAccess<T> where T : IEventArgs
 
     public Listener AddListener(EventHandlerListener<T> handler, Priority priority = Priority.Normal) =>
         _event.AddListener(handler, priority);
+
+    public void Dispose()
+    {
+        if (!_event.IsDisposed)
+            _event.Dispose();
+    }
 }

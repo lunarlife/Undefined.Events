@@ -8,9 +8,10 @@ public delegate void EventHandlerListener(Listener listener);
 
 public delegate void EventHandlerListener<in T>(T args, Listener listener) where T : IEventArgs;
 
-public interface IEvent
+public interface IEvent : IDisposable
 {
     public IReadOnlyList<Listener> Listeners { get; }
+    public bool IsDisposed { get; }
     public void DetachListener(Listener listener);
     public void DetachAllListeners();
 }
@@ -20,8 +21,11 @@ public class EventBase : IEvent
     private readonly List<Listener> _eventListeners = [];
     private readonly Dictionary<Priority, List<Listener>> _eventListenersPriority = new();
     private readonly object _lockObj = new();
+    private bool _isDisposed;
 
     public IReadOnlyList<Listener> Listeners => _eventListeners.AsReadOnly();
+
+    public bool IsDisposed => _isDisposed;
 
     internal EventBase()
     {
@@ -29,15 +33,20 @@ public class EventBase : IEvent
 
     public void DetachAllListeners()
     {
+        CheckIsDisposed();
         lock (_lockObj)
         {
-            for (var i = 0; i < _eventListeners.Count; i++) _eventListeners.RemoveAt(i);
-            _eventListenersPriority.Clear();
+            for (var i = _eventListeners.Count - 1; i >= 0; i--)
+            {
+                var listener = _eventListeners[i];
+                listener.Detach();
+            }
         }
     }
 
     public void DetachListener(Listener listener)
     {
+        CheckIsDisposed();
         lock (_lockObj)
             if (!_eventListeners.Remove(listener) ||
                 !_eventListenersPriority.TryGetValue(listener.Priority, out var list) || !list.Remove(listener))
@@ -46,6 +55,7 @@ public class EventBase : IEvent
 
     protected void Raise<T>(T? value) where T : IEventArgs
     {
+        CheckIsDisposed();
         lock (_lockObj)
             for (var priority = Priority.Lowest; priority <= Priority.Monitor; priority++)
             {
@@ -72,6 +82,7 @@ public class EventBase : IEvent
 
     internal Listener Add(Listener listener)
     {
+        CheckIsDisposed();
         lock (_lockObj)
         {
             _eventListeners.Add(listener);
@@ -86,6 +97,18 @@ public class EventBase : IEvent
 
         return listener;
     }
+
+    public virtual void Dispose()
+    {
+        CheckIsDisposed();
+        DetachAllListeners();
+        _isDisposed = true;
+    }
+
+    private void CheckIsDisposed()
+    {
+        if (_isDisposed) throw new ObjectDisposedException(null);
+    }
 }
 
 public sealed class Event : EventBase
@@ -97,8 +120,14 @@ public sealed class Event : EventBase
         Access = new EventAccess(this);
     }
 
+    public override void Dispose()
+    {
+        base.Dispose();
+        Access.Dispose();
+    }
+
     public void Raise() => base.Raise<IEventArgs>(null);
-    public async Task RaiseAsync() => await Task.Run(() => base.Raise<IEventArgs>(null));
+    public async Task RaiseAsync() => await Task.Run(Raise);
 
     public Listener AddListener(EventHandler handler, Priority priority = Priority.Normal) =>
         Add(new Listener(this, handler, priority, false));
@@ -110,7 +139,7 @@ public sealed class Event : EventBase
 public sealed class Event<T> : EventBase where T : IEventArgs
 {
     public IEventAccess<T> Access { get; }
-    private bool _isStatic;
+    private readonly bool _isStatic;
 
     public Event()
     {
@@ -133,6 +162,12 @@ public sealed class Event<T> : EventBase where T : IEventArgs
     public async Task<RaiseResult<T>> RaiseAsync(T args)
     {
         return await Task.Run(() => Raise(args));
+    }
+
+    public override void Dispose()
+    {
+        base.Dispose();
+        Access.Dispose();
     }
 
     public Listener AddListener(EventHandler<T> handler, Priority priority = Priority.Normal) =>
