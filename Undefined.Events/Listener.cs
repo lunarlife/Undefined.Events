@@ -9,13 +9,15 @@ public sealed class Listener : IDisposable
     internal bool RequireListener { get; }
     
     public bool IsAttached { get; private set; } = true;
+    public bool IsOneTime { get; }
 
-    internal Listener(IEvent @event, Delegate @delegate, Priority priority, bool requireListener)
+    internal Listener(IEvent @event, Delegate @delegate, Priority priority, bool requireListener, bool isOneTime)
     {
         _event = @event;
         Delegate = @delegate;
         Priority = priority;
         RequireListener = requireListener;
+        IsOneTime = isOneTime;
     }
 
     public void Detach()

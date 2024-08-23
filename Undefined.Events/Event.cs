@@ -61,22 +61,23 @@ public class EventBase : IEvent
             {
                 if (!_eventListenersPriority.TryGetValue(priority, out var list))
                     continue;
-                if (value is null)
-                    for (var i = list.Count - 1; i >= 0; i--)
+                for (var i = list.Count - 1; i >= 0; i--)
+                {
+                    var listener = list[i];
+                    if (value is null)
                     {
-                        var listener = list[i];
                         if (listener.RequireListener)
                             ((EventHandlerListener)listener.Delegate).Invoke(listener);
                         else ((EventHandler)listener.Delegate).Invoke();
                     }
-                else
-                    for (var i = list.Count - 1; i >= 0; i--)
+                    else
                     {
-                        var listener = list[i];
                         if (listener.RequireListener)
                             ((EventHandlerListener<T>)listener.Delegate).Invoke(value, listener);
                         else ((EventHandler<T>)listener.Delegate).Invoke(value);
                     }
+                    if(listener.IsOneTime) listener.Detach();
+                }
             }
     }
 
@@ -130,10 +131,16 @@ public sealed class Event : EventBase
     public async Task RaiseAsync() => await Task.Run(Raise);
 
     public Listener AddListener(EventHandler handler, Priority priority = Priority.Normal) =>
-        Add(new Listener(this, handler, priority, false));
+        Add(new Listener(this, handler, priority, false, false));
 
     public Listener AddListener(EventHandlerListener handler, Priority priority = Priority.Normal) =>
-        Add(new Listener(this, handler, priority, true));
+        Add(new Listener(this, handler, priority, true, false));
+
+    public Listener AddOneTimeListener(EventHandler handler, Priority priority = Priority.Normal) =>
+        Add(new Listener(this, handler, priority, false, true));
+
+    public Listener AddOneTimeListener(EventHandlerListener handler, Priority priority = Priority.Normal) =>
+        Add(new Listener(this, handler, priority, true, true));
 }
 
 public sealed class Event<T> : EventBase where T : IEventArgs
@@ -171,8 +178,14 @@ public sealed class Event<T> : EventBase where T : IEventArgs
     }
 
     public Listener AddListener(EventHandler<T> handler, Priority priority = Priority.Normal) =>
-        Add(new Listener(this, handler, priority, false));
+        Add(new Listener(this, handler, priority, false, false));
 
     public Listener AddListener(EventHandlerListener<T> handler, Priority priority = Priority.Normal) =>
-        Add(new Listener(this, handler, priority, true));
+        Add(new Listener(this, handler, priority, true, false));
+
+    public Listener AddOneTimeListener(EventHandler<T> handler, Priority priority = Priority.Normal) =>
+        Add(new Listener(this, handler, priority, false, true));
+
+    public Listener AddOneTimeListener(EventHandlerListener<T> handler, Priority priority = Priority.Normal) =>
+        Add(new Listener(this, handler, priority, true, true));
 }

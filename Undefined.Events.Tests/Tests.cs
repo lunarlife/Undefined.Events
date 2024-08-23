@@ -32,6 +32,19 @@ public class Tests
         if (_isEventRaised) Assert.Fail();
         Assert.Pass();
     }
+    [Test]
+    public void RaiseOneTimeEvent()
+    {
+        var listener = _eventAccess.AddOneTimeListener(OnEventRaised);
+        _event.Raise(new TestEventArgs(TEST_ARGS_VALUE));
+        if (!_isEventRaised) Assert.Fail();
+        Assert.Catch(listener.Detach);
+        _isEventRaised = false;
+
+        _event.Raise(new TestEventArgs(TEST_ARGS_VALUE));
+        if (_isEventRaised) Assert.Fail();
+        Assert.Pass();
+    }
 
     [Test]
     public void RaiseStaticEvent()

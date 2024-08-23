@@ -14,11 +14,26 @@ public static class EventsManager
             return GetEvent<T>().AddListener(handler, priority);
     }
 
+    public static Listener AddOneTimeStaticListener<T>(EventHandler<T> handler, Priority priority = Priority.Normal)
+        where T : IEventArgs
+    {
+        lock (LockObj)
+            return GetEvent<T>().AddOneTimeListener(handler, priority);
+    }
+
     public static Listener AddStaticListener<T>(EventHandlerListener<T> handler, Priority priority = Priority.Normal)
         where T : IEventArgs
     {
         lock (LockObj)
-            return GetEvent<T>().AddListener((args, listener) => handler(args, listener), priority);
+            return GetEvent<T>().AddListener(handler, priority);
+    }
+
+    public static Listener AddOneTimeStaticListener<T>(EventHandlerListener<T> handler,
+        Priority priority = Priority.Normal)
+        where T : IEventArgs
+    {
+        lock (LockObj)
+            return GetEvent<T>().AddOneTimeListener(handler, priority);
     }
 
     private static Event<T> GetEvent<T>() where T : IEventArgs
@@ -44,6 +59,7 @@ public static class EventsManager
 
     public static IReadOnlyList<Listener> AddStaticListeners(IEventsHandler handler) =>
         AddStaticListeners(handler.GetType(), handler);
+
 
     public static IReadOnlyList<Listener> AddStaticListeners<T>() => AddStaticListeners(typeof(T), null);
 
@@ -78,8 +94,10 @@ public static class EventsManager
 
                     var delegateType = (hasListener ? typeof(EventHandlerListener<>) : typeof(EventHandler<>))
                         .MakeGenericType(eventType);
-                    var del = isStatic ? method.CreateDelegate(delegateType) : method.CreateDelegate(delegateType, listener);
-                    var l = new Listener(e, del, attribute.Priority, hasListener);
+                    var del = isStatic
+                        ? method.CreateDelegate(delegateType)
+                        : method.CreateDelegate(delegateType, listener);
+                    var l = new Listener(e, del, attribute.Priority, hasListener, attribute.IsOneTime);
                     listeners.Add(l);
                     e.Add(l);
                 }
